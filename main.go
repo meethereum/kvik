@@ -1,23 +1,22 @@
 package main
 
 import (
+	"example.com/m/v2/db"
+	"example.com/m/v2/web"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
-
-	bolt "go.etcd.io/bbolt"
 )
 
-var(
-	dbLocation = flag.String("db-location","","The path to the boltdb database")
-	httpAddr = flag.String("http-addr","127.0.0.1:8090","The http address where API server will run")
+var (
+	dbLocation = flag.String("db-location", "", "The path to the boltdb database")
+	httpAddr   = flag.String("http-addr", "127.0.0.1:8090", "The http address where API server will run")
 )
 
-func parseFlags(){
+func parseFlags() {
 	flag.Parse()
 
-	if *dbLocation == ""{
+	if *dbLocation == "" {
 		log.Fatalf("Must provide the db location flag")
 	}
 }
@@ -26,19 +25,17 @@ func main() {
 
 	parseFlags()
 
-	db, err := bolt.Open(*dbLocation, 0600, nil)
+	db, close, err := db.NewDatabase(*dbLocation)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("NewDatabase(%q): %v", *dbLocation, err)
 	}
-	defer db.Close()
 
-	http.HandleFunc("/get",func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w,"Called get")
-	})
+	defer close()
 
-	http.HandleFunc("/set",func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w,"Called set")
-	})
+	srv := web.NewServer(db)
 
-	log.Fatal(http.ListenAndServe(*httpAddr,nil))
+	http.HandleFunc("/get", srv.GetKeyHandler)
+	http.HandleFunc("/set", srv.SetKeyHandler)
+
+	log.Fatal(http.ListenAndServe(*httpAddr, nil))
 }
