@@ -24,7 +24,7 @@ func (s *Server) GetKeyHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.WithFields(log.Fields{
 		"key":   key,
-		"value": value,
+		"value": string(value),
 		"error": err,
 	}).Info("GetKeyHandler invoked")
 }
