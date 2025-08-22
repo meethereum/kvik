@@ -39,6 +39,7 @@ func (d *Database) createDefaultBucket() error {
 }
 
 // SetKey sets the key to the requested value into the default database or returns an error
+//key is a slice of bytes (currently for boltdb)
 func (d *Database) SetKey(key string, value []byte) error {
 	return d.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(defaultBucket)
