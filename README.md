@@ -23,6 +23,7 @@ curl 'http://localhost:8090/get?key=a'
 ```
 
 - next todo:
- [] add gitignore
- [] complete sharding logic : use static sharding and add redirection functionality
- [] make setup script
+
+1.  [ ] add gitignore
+2.  [ ] complete sharding logic : use static sharding and add redirection functionality
+3.  [ ] make setup script
