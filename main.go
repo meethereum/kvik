@@ -2,13 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
 
 	"example.com/m/v2/config"
 	"example.com/m/v2/db"
 	"example.com/m/v2/web"
 
-	// "github.com/BurntSushi/toml"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -16,7 +14,7 @@ import (
 
 var (
 	dbLocation = flag.String("db-location", "", "The path to the boltdb database")
-	httpAddr   = flag.String("http-addr", "127.0.0.1:8090", "The http address where API server will run")
+	httpAddr   = flag.String("http-addr", "", "The http address where API server will run")
 	configFile = flag.String("config-file", "sharding.toml", "Config file for static sharding")
 	shard      = flag.String("db-shard", "", "the db shard you want to access data from")
 )
@@ -24,12 +22,16 @@ var (
 func parseFlags() {
 	flag.Parse()
 
+	if *httpAddr == "" {
+		log.Fatal("Must provide http address of the db node/shard")
+	}
+
 	if *dbLocation == "" {
-		log.Fatalf("Must provide the db location flag")
+		log.Fatal("Must provide the db location flag")
 	}
 
 	if *shard == "" {
-		log.Fatalf("Must provide flag mentioning the shard")
+		log.Fatal("Must provide flag mentioning the shard")
 	}
 
 }
@@ -39,21 +41,24 @@ func main() {
 	parseFlags()
 	c, err := config.ParseFile(*configFile)
 	if err != nil {
-		log.Fatal("Error parsing config %q: %v", *configFile, err)
+		log.Fatalf("Error parsing config %q: %v", *configFile, err)
 	}
-	log.Info("Config file %s successfully parsed ", *configFile)
-
-	//this line is to be removed
-	fmt.Printf("%v", c)
+	log.Infof("Config file %s successfully parsed", *configFile)
 
 	db, close, err := db.NewDatabase(*dbLocation)
 	if err != nil {
-		log.Fatal("NewDatabase(%q): %v", *dbLocation, err)
+		log.Fatalf("NewDatabase(%q): %v", *dbLocation, err)
 	}
 
 	defer close()
 
-	srv := web.NewServer(db)
+	shards := c.Shards
+	shardIndex := config.GetShardIndexFromName(*shard, c.Shards)
+	addressMappings := config.CreateAddressMappings(shards)
+	if shardIndex == -1 {
+		log.Fatalf("given shard %s doesnt have an instance. please recheck config for shards", *shard)
+	}
+	srv := web.NewServer(db, len(shards), shardIndex, addressMappings)
 
 	http.HandleFunc("/get", srv.GetKeyHandler)
 	http.HandleFunc("/set", srv.SetKeyHandler)
