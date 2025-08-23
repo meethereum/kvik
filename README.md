@@ -9,7 +9,7 @@ a distributed key value store in golang
 2. to start the server :  
 
 ```shell
-go run main.go --db-location=../my.db --db-shard=Moscow
+bash launch.sh
 ```
 
 3. set key value pair using the API : 
@@ -24,6 +24,6 @@ curl 'http://localhost:8090/get?key=a'
 
 - next todo:
 
-1.  [ ] add gitignore
+1.  [X] add gitignore
 2.  [ ] complete sharding logic : use static sharding and add redirection functionality
-3.  [ ] make setup script
+3.  [X] make setup script

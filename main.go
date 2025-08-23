@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	 "fmt"
+	"fmt"
 
 	"example.com/m/v2/config"
 	"example.com/m/v2/db"
