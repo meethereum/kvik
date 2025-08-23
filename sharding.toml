@@ -1,19 +1,19 @@
 [[shards]]
-name = "Moscow"
+name = "Mumbai"
 idx = 0
 
 
 [[shards]]
-name = "Minsk"
+name = "Singapore"
 idx = 1
 
 
 [[shards]]
-name = "Kiev"
+name = "NewYork"
 idx = 2
 
 
 [[shards]]
-name = "Tashkent"
+name = "Moscow"
 idx = 3
 
